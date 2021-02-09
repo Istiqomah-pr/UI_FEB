@@ -1,0 +1,23 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"type": "npm",
+			"script": "start",
+			"problemMatcher": [
+				"$gulp-tsc"
+			],
+			"label": "npm: start",
+			"detail": "node ./dist/create.js"
+		},
+		{
+			"type": "npm",
+			"script": "query",
+			"problemMatcher": [
+				"$eslint-stylish"
+			],
+			"label": "npm: query",
+			"detail": "node ./dist/query.js"
+		}
+	]
+}

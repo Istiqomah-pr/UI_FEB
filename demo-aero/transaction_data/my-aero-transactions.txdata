@@ -1,0 +1,44 @@
+[
+    {
+        "transactionName": "myAeroExists",
+        "transactionLabel": "A test myAeroExists transaction",
+        "arguments": [
+            "001"
+        ],
+        "transientData": {}
+    },
+    {
+        "transactionName": "createMyAero",
+        "transactionLabel": "A test createMyAero transaction",
+        "arguments": [
+            "001",
+            "some value"
+        ],
+        "transientData": {}
+    },
+    {
+        "transactionName": "readMyAero",
+        "transactionLabel": "A test readMyAero transaction",
+        "arguments": [
+            "001"
+        ],
+        "transientData": {}
+    },
+    {
+        "transactionName": "updateMyAero",
+        "transactionLabel": "A test updateMyAero transaction",
+        "arguments": [
+            "001",
+            "some other value"
+        ],
+        "transientData": {}
+    },
+    {
+        "transactionName": "deleteMyAero",
+        "transactionLabel": "A test deleteMyAero transaction",
+        "arguments": [
+            "001"
+        ],
+        "transientData": {}
+    }
+]
