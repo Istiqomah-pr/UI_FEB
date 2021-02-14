@@ -17,6 +17,10 @@ export class MyAeroContract extends Contract {
 
     @Transaction()
     public async createMyAero(ctx: Context, myAeroId: string,model: string,type: string,year :number): Promise<void> {
+        const hasAccess = await this.hasRole(ctx, ['Maintenance']);
+        if (!hasAccess) {
+            throw new Error(`Only Maintenance_team can create Aircraft asset`);
+        }
         const exists: boolean = await this.myAeroExists(ctx, myAeroId);
         if (exists) {
             throw new Error(`The my aero ${myAeroId} already exists`);
@@ -45,6 +49,11 @@ export class MyAeroContract extends Contract {
 
     @Transaction()
     public async updateMyAero(ctx: Context, myAeroId: string,model: string,type: string,year :number): Promise<void> {
+        const hasAccess = await this.hasRole(ctx, ['Maintenance', 'Operator']);
+        if (!hasAccess) {
+            throw new Error(`Only Maintenance_team or Operator can update Aircraft asset`);
+        }
+
         const exists: boolean = await this.myAeroExists(ctx, myAeroId);
         if (!exists) {
             throw new Error(`The my aero ${myAeroId} does not exist`);
@@ -59,6 +68,11 @@ export class MyAeroContract extends Contract {
 
     @Transaction()
     public async deleteMyAero(ctx: Context, myAeroId: string): Promise<void> {
+        const hasAccess = await this.hasRole(ctx, ['Maintenance']);
+        if (!hasAccess) {
+            throw new Error(`Only Maintenance_team  can delete Aircraft asset`);
+        }
+
         const exists: boolean = await this.myAeroExists(ctx, myAeroId);
         if (!exists) {
             throw new Error(`The my aero ${myAeroId} does not exist`);
@@ -155,5 +169,17 @@ export class MyAeroContract extends Contract {
             }
         }
     }
+
+    public async hasRole(ctx: Context, roles: string[]) {
+        const clientID = ctx.clientIdentity;
+        for (const roleName of roles) {
+            if (clientID.assertAttributeValue('role', roleName)) {
+                if (clientID.getMSPID() === 'Org1MSP' && clientID.getAttributeValue('role') === 'Maintenance') { return true; }
+                if (clientID.getMSPID() === 'Org2MSP' && clientID.getAttributeValue('role') === 'Operator') { return true; }
+            }
+        }
+        return false;
+    }
+
 
 }
