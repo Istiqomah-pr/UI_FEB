@@ -11,5 +11,8 @@ export class MyAero {
     public year: number;
     public model: string;
     public type :string;
+    public amr_status : string;
+    public amr_desc : string;
+    public amr_type : string;
 
 }

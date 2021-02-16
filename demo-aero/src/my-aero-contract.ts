@@ -16,10 +16,10 @@ export class MyAeroContract extends Contract {
     }
 
     @Transaction()
-    public async createMyAero(ctx: Context, myAeroId: string,model: string,type: string,year :number): Promise<void> {
+    public async createMyAero(ctx: Context, myAeroId: string,model: string,type: string,year :number,amr_type :string, amr_status:string): Promise<void> {
         const hasAccess = await this.hasRole(ctx, ['Maintenance']);
         if (!hasAccess) {
-            throw new Error(`Only Maintenance_team can create Aircraft asset`);
+            throw new Error(`Only Maintenance_team can create Aircraft record`);
         }
         const exists: boolean = await this.myAeroExists(ctx, myAeroId);
         if (exists) {
@@ -29,10 +29,17 @@ export class MyAeroContract extends Contract {
         myAero.model = model;
         myAero.type = type;
         myAero.year = year;
+        myAero.amr_type=amr_type;
+        myAero.amr_status=amr_status;
         const buffer: Buffer = Buffer.from(JSON.stringify(myAero));
         await ctx.stub.putState(myAeroId, buffer);
       //  const eventPayload: Buffer = Buffer.from(`Created Aero Asset ${myAeroId} (${value})`); 
       //  ctx.stub.setEvent('myEvent', eventPayload); 
+      const transientMap = ctx.stub.getTransient();
+      if (transientMap.get('amr_desc')){
+          await ctx.stub.putPrivateData ('maintenanceRecord',myAeroId,transientMap.get('amr_desc'));
+      }
+
     }
 
     @Transaction(false)
@@ -44,14 +51,21 @@ export class MyAeroContract extends Contract {
         }
         const data: Uint8Array = await ctx.stub.getState(myAeroId);
         const myAero: MyAero = JSON.parse(data.toString()) as MyAero;
-        return myAero;
+        try {
+            const privBuffer = await ctx.stub.getPrivateData('maintenanceRecord',myAeroId);
+            myAero.amr_desc=privBuffer.toString(); 
+            return myAero;         
+        } catch (error){
+            return myAero;
+        }
+        
     }
 
     @Transaction()
-    public async updateMyAero(ctx: Context, myAeroId: string,model: string,type: string,year :number): Promise<void> {
-        const hasAccess = await this.hasRole(ctx, ['Maintenance', 'Operator']);
+    public async updateMyAero(ctx: Context, myAeroId: string,model: string,type: string,year :number,amr_type :string, amr_status:string): Promise<void> {
+        const hasAccess = await this.hasRole(ctx, ['Maintenance']);
         if (!hasAccess) {
-            throw new Error(`Only Maintenance_team or Operator can update Aircraft asset`);
+            throw new Error(`Only Maintenance_team  can update Aircraft record`);
         }
 
         const exists: boolean = await this.myAeroExists(ctx, myAeroId);
@@ -62,15 +76,17 @@ export class MyAeroContract extends Contract {
         myAero.model = model;
         myAero.type = type;
         myAero.year = year;
+        myAero.amr_type=amr_type;
+        myAero.amr_status=amr_status;
         const buffer: Buffer = Buffer.from(JSON.stringify(myAero));
         await ctx.stub.putState(myAeroId, buffer);
     }
 
     @Transaction()
     public async deleteMyAero(ctx: Context, myAeroId: string): Promise<void> {
-        const hasAccess = await this.hasRole(ctx, ['Maintenance']);
+        const hasAccess = await this.hasRole(ctx, ['Maintenance', 'Operator']);
         if (!hasAccess) {
-            throw new Error(`Only Maintenance_team  can delete Aircraft asset`);
+            throw new Error(`Only Maintenance_team or Operator can delete Aircraft record`);
         }
 
         const exists: boolean = await this.myAeroExists(ctx, myAeroId);
