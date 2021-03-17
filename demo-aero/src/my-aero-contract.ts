@@ -16,7 +16,7 @@ export class MyAeroContract extends Contract {
     }
 
     @Transaction()
-    public async createMyAero(ctx: Context, myAeroId: string,model: string,type: string,year :number,amr_type :string, amr_status:string): Promise<void> {
+    public async createMyAero(ctx: Context, myAeroId: string,model: string,location: string,year :number,amr_type :string, amr_status:string): Promise<void> {
         const hasAccess = await this.hasRole(ctx, ['Maintenance']);
         if (!hasAccess) {
             throw new Error(`Only Maintenance_team can create Aircraft record`);
@@ -27,14 +27,14 @@ export class MyAeroContract extends Contract {
         }
         const myAero: MyAero = new MyAero();
         myAero.model = model;
-        myAero.type = type;
+        myAero.location = location;
         myAero.year = year;
         myAero.amr_type=amr_type;
         myAero.amr_status=amr_status;
         const buffer: Buffer = Buffer.from(JSON.stringify(myAero));
         await ctx.stub.putState(myAeroId, buffer);
-      //  const eventPayload: Buffer = Buffer.from(`Created Aero Asset ${myAeroId} (${value})`); 
-      //  ctx.stub.setEvent('myEvent', eventPayload); 
+       // const eventPayload: Buffer = Buffer.from(`Created Aero Asset ${myAeroId} (${value})`); 
+      // ctx.stub.setEvent('myEvent', eventPayload); 
       const transientMap = ctx.stub.getTransient();
       if (transientMap.get('amr_desc')){
           await ctx.stub.putPrivateData ('maintenanceRecord',myAeroId,transientMap.get('amr_desc'));
@@ -62,7 +62,7 @@ export class MyAeroContract extends Contract {
     }
 
     @Transaction()
-    public async updateMyAero(ctx: Context, myAeroId: string,model: string,type: string,year :number,amr_type :string, amr_status:string): Promise<void> {
+    public async updateMyAero(ctx: Context, myAeroId: string,model: string,location: string,year :number,amr_type :string, amr_status:string): Promise<void> {
         const hasAccess = await this.hasRole(ctx, ['Maintenance']);
         if (!hasAccess) {
             throw new Error(`Only Maintenance_team  can update Aircraft record`);
@@ -74,7 +74,7 @@ export class MyAeroContract extends Contract {
         }
         const myAero: MyAero = new MyAero();
         myAero.model = model;
-        myAero.type = type;
+        myAero.location = location;
         myAero.year = year;
         myAero.amr_type=amr_type;
         myAero.amr_status=amr_status;
@@ -155,6 +155,33 @@ export class MyAeroContract extends Contract {
             }
         }
     }
+    @Transaction(false)
+    public async getHistoryByKey(ctx: Context, myAeroId: string): Promise<string> {
+        const iterator = await ctx.stub.getHistoryForKey(myAeroId);
+        const allResults = [];
+        while (true) {
+            const res = await iterator.next();
+            if (res.value && res.value.value.toString()) {
+                console.log(res.value.value.toString());
+
+                let Record;
+                try {
+                    Record = JSON.parse(res.value.value.toString());
+                } catch (err) {
+                    console.log(err);
+                    Record = res.value.value.toString();
+                }
+                allResults.push({ Record });
+            }
+            if (res.done) {
+                console.log('end of data');
+                await iterator.close();
+                console.info(allResults);
+                return JSON.stringify(allResults);
+            }
+        }
+    }
+
 
     @Transaction(false)
     public async queryMinYear(ctx: Context,min: number, size:number,bookmark:string): Promise<string> {

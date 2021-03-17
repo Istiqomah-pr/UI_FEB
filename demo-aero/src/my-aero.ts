@@ -10,7 +10,7 @@ export class MyAero {
     @Property()
     public year: number;
     public model: string;
-    public type :string;
+    public location :string;
     public amr_status : string;
     public amr_desc : string;
     public amr_type : string;
