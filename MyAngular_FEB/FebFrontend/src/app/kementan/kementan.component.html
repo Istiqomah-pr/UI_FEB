@@ -1,0 +1,41 @@
+<ng-container>
+    <mat-toolbar class="example-header">
+        <button mat-icon-button class="example-icon" 
+         mat-icon-button>
+          <mat-icon>menu</mat-icon>
+        </button>
+        <span>Kementan</span>
+        <span class="example-spacer"></span>
+    </mat-toolbar>
+
+    <mat-sidenav-container>
+        <mat-sidenav 
+        mode="side" 
+        [position]="'start'"
+        opened ="yes"
+        class="sidenav-left"
+        [fixedInViewport]="true"
+        [fixedTopGap]="60"
+        [fixedBottomGap]="0" >
+            <mat-nav-list>
+                <mat-list-item routerLink="/kementan/bataspenyimpanan">
+                      <h3>Batas Stok</h3>
+                </mat-list-item>
+              </mat-nav-list>
+              
+            </mat-sidenav>
+    
+            <mat-sidenav #sidenav mode="side" [position]="'end'"  class="example-sidenav"
+            [fixedInViewport]="true" [fixedTopGap]="60"
+            [fixedBottomGap]="0">
+            
+            </mat-sidenav>
+            <mat-sidenav-content style="padding: 20px; background-color: #ccc;">
+            <router-outlet></router-outlet>
+        </mat-sidenav-content>
+      </mat-sidenav-container>
+    </ng-container>
+    
+    
+    
+    
